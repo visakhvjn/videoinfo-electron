@@ -3,15 +3,19 @@ const ffmpeg = require('fluent-ffmpeg');
 
 const { app, BrowserWindow, ipcMain, dialog } = electron;
 
+let mainWindow;
+
 app.on('ready', () => {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   });
+
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
+  // opens a file dialog box
   ipcMain.handle('open-file', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile'],
@@ -26,6 +30,7 @@ app.on('ready', () => {
 
 ipcMain.on('video:submit', (event, path) => {
     ffmpeg.ffprobe(path, (err, metadata) => {
-        console.log(metadata.format.duration);
+      const duration = metadata.format.duration;
+      mainWindow.webContents.send('video:metadata', duration);
     });
 });

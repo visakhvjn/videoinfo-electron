@@ -1,0 +1,20 @@
+<head></head>
+<body>
+    <h1>Video Info</h1>
+    <button id="select-video">Select a Video!</button>
+    <p id="video-path">No video selected.</p>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Request file path from the main process
+        document.getElementById('select-video').addEventListener('click', async () => {
+            const filePath = await ipcRenderer.invoke('open-file');
+            
+            if (filePath) {
+                document.getElementById('video-path').textContent = `Selected: ${filePath}`;
+                ipcRenderer.send('video:submit', filePath);
+            }
+        });
+    </script>
+</body>
